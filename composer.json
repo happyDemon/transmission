@@ -1,0 +1,23 @@
+{
+    "name": "happydemon/transmission",
+    "description": "A little helper for making calls to the Transmission Daemon RPC interface Edit",
+    "type": "library",
+    "keywords": ["transmission", "torrent", "RPC"],
+    "require": {
+        "nesbot/carbon": "^1.22",
+        "guzzlehttp/guzzle": "^6.3"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Maxim Kerstens",
+            "email": "maxim@happydemon.xyz"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "HappyDemon\\Transmission\\": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
