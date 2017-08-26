@@ -154,7 +154,7 @@ $torrent->setBandwidthPriority(1);
 ```
 ```php
 // set the download limit (in K/s)
-$torrent->setDownloadLimit(false);
+$torrent->setDownloadLimit(1024*3);
 ```
 ```php
 // Mark files as wanted

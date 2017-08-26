@@ -253,4 +253,65 @@ class Entity extends BaseEntity
             $property => $arguments[0],
         ]);
     }
+
+    public function __get( $property )
+    {
+        if($property != 'files') return parent::__get($property);
+
+        switch($property)
+        {
+            case 'files':
+                return $this->normaliseFiles();
+                break;
+            case 'wanted':
+                $files = $this->normaliseFiles();
+                $list = [];
+
+                foreach($this->properties['wanted'] as $file => $wanted)
+                {
+                    $files[$file]->wanted = (bool) $wanted;
+                    $list[] = $files[$file];
+                }
+
+                return $list;
+                break;
+            case 'priorities':
+                $files = $this->normaliseFiles();
+                $list = [];
+
+                foreach($this->properties['priorities'] as $file => $priority)
+                {
+                    switch($priority)
+                    {
+                        case 0:
+                            $priority = 'normal';
+                            break;
+                        case 1:
+                            $priority = 'high';
+                            break;
+                        default:
+                            $priority = 'low';
+                            break;
+                    }
+                    $files[$file]->priority = $priority;
+                    $list[] = $files[$file];
+                }
+
+                return $list;
+                break;
+        }
+    }
+
+    protected function normaliseFiles()
+    {
+        $files = [];
+
+        foreach($this->properties['files'] as $id => $file)
+        {
+            $file->id = $id;
+            $files[$id] = $file;
+        }
+
+        return $files;
+    }
 }
