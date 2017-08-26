@@ -64,24 +64,35 @@ What password is used to authenticate? (empty by default)
 Retrieves the list of torrents you see in transmission.
 
 ```php
-$transmission->torrents()->get()
+$transmission->torrents()->get();
 ```
 
 This will always return an array with `HappyDemon\Services\Transmission\Torrents\Entity` objects.
 You can check out the class to see what properties are available to it.
 
-### Adding torrents
+You could also use it to retrieve a single or multiple torrents that you have the ID of:
 
-**WIP**
 
 ```php
-$torrent = $transmission->torrents()->addFromUrl($urlToTorrent)
-$torrent = $transmission->torrents()->addFile($filePath)
-$torrent = $transmission->torrents()->addFromBase64($fileBlob)
+// Get the torrent with id 1
+$transmission->torrents()->get(1);
+
+
+// Get a few torrents
+$transmission->torrents()->get([1,6,12]);
+```
+
+### Adding torrents
+
+```php
+$torrent = $transmission->torrents()->addFromUrl($urlToTorrent);
+$torrent = $transmission->torrents()->addFile($filePath);
+$torrent = $transmission->torrents()->addFromBase64($fileBlob);
 ```
 
 Using any of these methods will let you add new torrents.
 Each time it will return a `HappyDemon\Services\Transmission\Torrents\Entity` object.
+The catch is, only 3 properties will be set though: id, hashString & name.
 
 ## Torrent entity methods
 

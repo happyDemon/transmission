@@ -3,9 +3,9 @@
 namespace HappyDemon\Transmission\Torrents;
 
 
-use HappyDemon\Transmission\Transmission;
+use HappyDemon\Transmission\Request as BaseRequest;
 
-class Request
+class Request extends BaseRequest
 {
     protected $transmission;
 
@@ -20,26 +20,26 @@ class Request
     ];
 
     /**
-     * Request constructor.
-     *
-     * @param Transmission $transmission
-     */
-    public function __construct( Transmission $transmission )
-    {
-        $this->transmission = $transmission;
-    }
-
-    /**
      * Get all torrents.
+     *
+     * @param null|integer|array $id
      *
      * @return Entity[]
      */
-    public function get()
+    public function get($id = null)
     {
-        return $this->transmission->request->send([
-            'arguments' => [
-                'fields' => $this->fields
-            ],
+        $arguments = [
+            'fields' => $this->fields
+        ];
+
+        // Register the id(s)
+        if($id !== null)
+        {
+            $arguments['ids'] = (is_array($id)) ? $id : [$id];
+        }
+
+        return $this->send([
+            'arguments' => $arguments,
             'method' => 'torrent-get'
         ]);
     }
@@ -62,7 +62,7 @@ class Request
      */
     public function addFromUrl( $url, $extra_param = [] )
     {
-        return $this->transmission->request->send([
+        return $this->send([
             'method' => 'torrent-add',
             'arguments' => array_merge($extra_param, ['filename' => $url])
         ]);
@@ -99,7 +99,7 @@ class Request
         // Make sure filename is not present
         unset($extra_param['filename']);
 
-        return $this->transmission->request->send([
+        return $this->send([
             'method' => 'torrent-add',
             'arguments' => array_merge($extra_param, ['metainfo' => $content])
         ]);
