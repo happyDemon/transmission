@@ -1,6 +1,6 @@
 <?php
 
-namespace HappyDemon\Services\Transmission\Torrents;
+namespace HappyDemon\Transmission\Torrents;
 
 
 use HappyDemon\Transmission\Entity as BaseEntity;
