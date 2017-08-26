@@ -139,7 +139,7 @@ Moves the specific torrent to a different location on your file system.
 #### update
 Allows you to update some torrent-specific settings.
 ```php
-$torrent->update($properties);
+$torrent->settings($properties);
 ```
 
 You could also update a singular torrent-setting like this:

@@ -26,8 +26,7 @@ use HappyDemon\Transmission\Entity as BaseEntity;
  * @property string error
  * @property string errorString
  * @property string eta
- * @property string files
- * @property string fileStats
+ * @property array fileStats
  * @property string hashString
  * @property string haveUnchecked
  * @property string haveValid
@@ -44,7 +43,7 @@ use HappyDemon\Transmission\Entity as BaseEntity;
  * @property string peer-limit
  * @property string peers
  * @property string peersConnected
- * @property string peersFrom
+ * @property array peersFrom
  * @property string peersGettingFromUs
  * @property string peersKnown
  * @property string peersSendingToUs
@@ -52,7 +51,7 @@ use HappyDemon\Transmission\Entity as BaseEntity;
  * @property string pieces
  * @property string pieceCount
  * @property string pieceSize
- * @property string priorities
+ * @property array priorities
  * @property string rateDownload
  * @property string rateUpload
  * @property string recheckProgress
@@ -63,16 +62,16 @@ use HappyDemon\Transmission\Entity as BaseEntity;
  * @property string sizeWhenDone
  * @property string startDate
  * @property string status
- * @property string trackers
- * @property string trackerStats
+ * @property array trackers
+ * @property array trackerStats
  * @property string totalSize
  * @property string torrentFile
  * @property string uploadedEver
  * @property string uploadLimit
  * @property string uploadLimited
  * @property string uploadRatio
- * @property string wanted
- * @property string webseeds
+ * @property array wanted
+ * @property array webseeds
  * @property string webseedsSendingToUs
  *
  * @method setDownloadLimited(boolean $shouldBeLimited)
@@ -96,6 +95,13 @@ class Entity extends BaseEntity
     const SINGULAR_OBJECT = ['torrent-added'];
     const MULTIPLE_OBJECT = ['torrents'];
 
+    public $files = [];
+
+    /**
+     * Start the torrent.
+     *
+     * @return array
+     */
     public function start()
     {
         return $this->transmission->request->send([
@@ -106,6 +112,11 @@ class Entity extends BaseEntity
         ]);
     }
 
+    /**
+     * Stop or pause the torrent.
+     *
+     * @return array
+     */
     public function stop()
     {
         return $this->transmission->request->send([
@@ -117,6 +128,11 @@ class Entity extends BaseEntity
 
     }
 
+    /**
+     * Verify the torrent.
+     *
+     * @return array
+     */
     public function verify()
     {
         return $this->transmission->request->send([
@@ -142,6 +158,11 @@ class Entity extends BaseEntity
 
     }
 
+    /**
+     * Remove the torrent.
+     *
+     * @return array
+     */
     public function remove()
     {
         return $this->transmission->request->send([
@@ -152,6 +173,13 @@ class Entity extends BaseEntity
         ]);
     }
 
+    /**
+     * Move the torrent.
+     *
+     * @param $location
+     *
+     * @return array
+     */
     public function move( $location )
     {
         return $this->transmission->request->send([
@@ -191,7 +219,14 @@ class Entity extends BaseEntity
         }
     }
 
-    public function update( $properties )
+    /**
+     * Change torrent-specific settings.
+     *
+     * @param $properties
+     *
+     * @return array
+     */
+    public function settings( $properties )
     {
         $propertyKeys = array_keys($properties);
 
@@ -205,6 +240,11 @@ class Entity extends BaseEntity
         ]);
     }
 
+    /**
+     * Makes the status human-readable.
+     *
+     * @return string
+     */
     public function status()
     {
         $status = [
@@ -214,21 +254,43 @@ class Entity extends BaseEntity
         return $status[$this->status];
     }
 
+    /**
+     * Returns the activity date as a DateTime Object.
+     *
+     * @return \DateTime
+     */
     public function activityDate()
     {
         return new \DateTime($this->activityDate);
     }
 
+    /**
+     * Returns the added date as a DateTime Object.
+     *
+     * @return \DateTime
+     */
     public function addedDate()
     {
         return new \DateTime($this->addedDate);
     }
 
+
+    /**
+     * Returns the created date as a DateTime Object.
+     *
+     * @return \DateTime
+     */
     public function dateCreated()
     {
         return new \DateTime($this->dateCreated);
     }
 
+
+    /**
+     * Returns the done date as a DateTime Object.
+     *
+     * @return \DateTime
+     */
     public function doneDate()
     {
         if ( $this->doneDate == 0 ) return null;
@@ -236,11 +298,24 @@ class Entity extends BaseEntity
         return new \DateTime($this->doneDate);
     }
 
+    /**
+     * Returns the percentage done.
+     *
+     * @return integer
+     */
     public function percentDone()
     {
         return $this->percentDone * 100;
     }
 
+    /**
+     * Short hand call to update torrent settings
+     *
+     * @param $method
+     * @param $arguments
+     *
+     * @return array|void
+     */
     public function __call( $method, $arguments )
     {
         // We're only looking for methods prefixed with 'set'
@@ -264,69 +339,23 @@ class Entity extends BaseEntity
         }
 
         // Update the single property
-        return $this->update([
+        $this->settings([
             $property => $arguments[0],
         ]);
     }
 
-    public function __get( $property )
+    public function update( $fields )
     {
-        if($property != 'files') return parent::__get($property);
+        parent::update($fields);
 
-        switch($property)
+        $this->files = [];
+
+        if(count($this->properties['files']) > 0)
         {
-            case 'files':
-                return $this->normaliseFiles();
-                break;
-            case 'wanted':
-                $files = $this->normaliseFiles();
-                $list = [];
-
-                foreach($this->properties['wanted'] as $file => $wanted)
-                {
-                    $files[$file]->wanted = (bool) $wanted;
-                    $list[] = $files[$file];
-                }
-
-                return $list;
-                break;
-            case 'priorities':
-                $files = $this->normaliseFiles();
-                $list = [];
-
-                foreach($this->properties['priorities'] as $file => $priority)
-                {
-                    switch($priority)
-                    {
-                        case 0:
-                            $priority = 'normal';
-                            break;
-                        case 1:
-                            $priority = 'high';
-                            break;
-                        default:
-                            $priority = 'low';
-                            break;
-                    }
-                    $files[$file]->priority = $priority;
-                    $list[] = $files[$file];
-                }
-
-                return $list;
-                break;
+            foreach($this->properties['files'] as $id => $file)
+            {
+                $this->files[$id] = new File($this, $id);
+            }
         }
-    }
-
-    protected function normaliseFiles()
-    {
-        $files = [];
-
-        foreach($this->properties['files'] as $id => $file)
-        {
-            $file->id = $id;
-            $files[$id] = $file;
-        }
-
-        return $files;
     }
 }
