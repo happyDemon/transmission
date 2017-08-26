@@ -74,6 +74,21 @@ use HappyDemon\Transmission\Entity as BaseEntity;
  * @property string wanted
  * @property string webseeds
  * @property string webseedsSendingToUs
+ *
+ * @method setDownloadLimited(boolean $shouldBeLimited)
+ * @method setBandwidthPriority(integer $priority)
+ * @method setDownloadLimit(integer $limit)
+ * @method setFilesWanted(array $wantedFiles)
+ * @method setFilesUnwanted(array $unwantedFiles)
+ * @method setLocation(string $directory)
+ * @method setPeerLimit(integer $limit)
+ * @method setPriorityHigh(array $files)
+ * @method setPriorityLow(array $files)
+ * @method setPriorityNormal(array $files)
+ * @method setSeedRatioLimit(double $ratio)
+ * @method setSeedRatioMode(integer $mode)
+ * @method setUploadLimit(integer $limit)
+ * @method setUploadLimited(boolean $shouldBeLimited)
  */
 class Entity extends BaseEntity
 {

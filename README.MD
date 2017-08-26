@@ -174,7 +174,7 @@ $torrent->setHonorsSessionLimits(true);
 ```
 ```php
 // Set a new directory for the torrent's contents
-$torrent->setLocation(false);
+$torrent->setLocation('c:/downloads');
 ```
 ```php
 // Set the peer limit (max amount of peer)
