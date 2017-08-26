@@ -4,6 +4,7 @@ namespace HappyDemon\Transmission\Torrents;
 
 
 use HappyDemon\Transmission\Entity as BaseEntity;
+
 /**
  * Torrent Entity
  *
@@ -80,13 +81,13 @@ class Entity extends BaseEntity
     const SINGULAR_OBJECT = ['torrent-added'];
     const MULTIPLE_OBJECT = ['torrents'];
 
-    public function start(  )
+    public function start()
     {
         return $this->transmission->request->send([
             'arguments' => [
-                'ids' => $this->id
+                'ids' => $this->id,
             ],
-            'method' => 'torrent-start'
+            'method'    => 'torrent-start',
         ]);
     }
 
@@ -94,22 +95,22 @@ class Entity extends BaseEntity
     {
         return $this->transmission->request->send([
             'arguments' => [
-                'ids' => $this->id
+                'ids' => $this->id,
             ],
-            'method' => 'torrent-stop'
+            'method'    => 'torrent-stop',
         ]);
-        
+
     }
 
     public function verify()
     {
         return $this->transmission->request->send([
             'arguments' => [
-                'ids' => $this->id
+                'ids' => $this->id,
             ],
-            'method' => 'torrent-verify'
+            'method'    => 'torrent-verify',
         ]);
-        
+
     }
 
     /**
@@ -119,20 +120,20 @@ class Entity extends BaseEntity
     {
         return $this->transmission->request->send([
             'arguments' => [
-                'ids' => $this->id
+                'ids' => $this->id,
             ],
-            'method' => 'torrent-reannounce'
+            'method'    => 'torrent-reannounce',
         ]);
-        
+
     }
 
     public function remove()
     {
         return $this->transmission->request->send([
             'arguments' => [
-                'ids' => $this->id
+                'ids' => $this->id,
             ],
-            'method' => 'torrent-remove'
+            'method'    => 'torrent-remove',
         ]);
     }
 
@@ -140,55 +141,59 @@ class Entity extends BaseEntity
     {
         return $this->transmission->request->send([
             'arguments' => [
-                'ids' => $this->id,
+                'ids'      => $this->id,
                 'location' => $location,
-                'move' => true
+                'move'     => true,
             ],
-            'method' => 'torrent-move'
+            'method'    => 'torrent-move',
         ]);
 
     }
 
+    protected $allowedUpdates = [
+        "bandwidthPriority"   => 'integer', "downloadLimit" => 'integer', "downloadLimited" => 'boolean', "files-wanted" => 'array', "files-unwanted" => 'array',
+        "honorsSessionLimits" => "boolean", "location" => 'string', "peer-limit" => 'number', "priority-high" => 'array', "priority-low" => 'array',
+        "priority-normal"     => 'array', "seedRatioLimit" => 'double', "seedRatioMode" => 'integer', "uploadLimit" => 'integer', "uploadLimited" => 'boolean',
+    ];
+
+    protected function validateUpdateProperty( $key, $value )
+    {
+        if ( !array_key_exists($key, $this->allowedUpdates) ) throw new \Exception('Property is not updateable: ' . $key);
+
+        switch ( $this->allowedUpdates[$key] ) {
+            case 'integer':
+                if ( !is_numeric($value) ) throw new \Exception('Property is not an integer: ' . $key);
+                break;
+            case 'array':
+                if ( !is_array($value) ) throw new \Exception('Property is not an integer: ' . $key);
+                break;
+            case 'boolean':
+                if ( !is_bool($value) ) throw new \Exception('Property is not an integer: ' . $key);
+                break;
+            case 'double':
+                if ( !is_double($value) ) throw new \Exception('Property is not an integer: ' . $key);
+                break;
+        }
+    }
+
     public function update( $properties )
     {
-        $allowedUpdates = [
-            "bandwidthPriority" => 'integer', "downloadLimit" => 'integer', "downloadLimited" => 'boolean', "files-wanted" => 'array', "files-unwanted" => 'array',
-            "honorsSessionLimits" => "boolean", "location" => 'string', "peer-limit" => 'number', "priority-high" => 'array', "priority-low" => 'array',
-            "priority-normal" => 'array', "seedRatioLimit" => 'double', "seedRatioMode" => 'integer', "uploadLimit" => 'integer', "uploadLimited" => 'boolean'
-        ];
-
         $propertyKeys = array_keys($properties);
 
-        foreach($propertyKeys as $key) {
-            if ( !array_key_exists($key, $allowedUpdates) ) throw new \Exception('Property is not updateable: ' . $key);
-
-            switch ( $allowedUpdates[$key] )
-            {
-                case 'integer':
-                    if(!is_numeric($properties[$key])) throw new \Exception('Property is not an integer: ' . $key);
-                    break;
-                case 'array':
-                    if(!is_array($properties[$key])) throw new \Exception('Property is not an integer: ' . $key);
-                    break;
-                case 'boolean':
-                    if(!is_bool($properties[$key])) throw new \Exception('Property is not an integer: ' . $key);
-                    break;
-                case 'double':
-                    if(!is_double($properties[$key])) throw new \Exception('Property is not an integer: ' . $key);
-                    break;
-            }
+        foreach ( $propertyKeys as $key ) {
+            $this->validateUpdateProperty($key, $properties[$key]);
         }
 
         return $this->transmission->request->send([
             'arguments' => array_merge($properties, ['ids' => $this->id]),
-            'method' => 'torrent-set'
+            'method'    => 'torrent-set',
         ]);
     }
 
     public function status()
     {
-        $status= [
-            'STOPPED', 'CHECK_WAIT', 'CHECK', 'DOWNLOAD_WAIT', 'DOWNLOAD', 'SEED_WAIT', 'SEED', 'ISOLATED'
+        $status = [
+            'STOPPED', 'CHECK_WAIT', 'CHECK', 'DOWNLOAD_WAIT', 'DOWNLOAD', 'SEED_WAIT', 'SEED', 'ISOLATED',
         ];
 
         return $status[$this->status];
@@ -211,7 +216,7 @@ class Entity extends BaseEntity
 
     public function doneDate()
     {
-        if($this->doneDate == 0) return null;
+        if ( $this->doneDate == 0 ) return null;
 
         return new \DateTime($this->doneDate);
     }
@@ -219,5 +224,33 @@ class Entity extends BaseEntity
     public function percentDone()
     {
         return $this->percentDone * 100;
+    }
+
+    public function __call( $method, $arguments )
+    {
+        // We're only looking for methods prefixed with 'set'
+        if ( strpos($method, 'set') != 0 ) return;
+
+        // Normalise the method name to a property's name
+        $property = lcfirst(substr($method, 3));
+
+        // handle special cases
+        if ( strpos($property, 'files') == 0 )
+        {
+            $property = 'files-' . strtolower(str_replace('files', '', $property));
+        }
+        else if ( strpos($property, 'priority') == 0 )
+        {
+            $property = 'priority-' . strtolower(str_replace('priority', '', $property));
+        }
+        else if ( strpos($property, 'peer') == 0 )
+        {
+            $property = 'peer-' . strtolower(str_replace('peer', '', $property));
+        }
+
+        // Update the single property
+        return $this->update([
+            $property => $arguments[0],
+        ]);
     }
 }

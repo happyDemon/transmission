@@ -137,10 +137,84 @@ $torrent->move();
 Moves the specific torrent to a different location on your file system.
 
 #### update
+Allows you to update some torrent-specific settings.
 ```php
 $torrent->update($properties);
 ```
-Allows you to update some torrent-specific settings, it's best to dig into method to see what properties you're able to update.
+
+You could also update a singular torrent-setting like this:
+
+```php
+// remove the download limit
+$torrent->setDownloadLimited(false);
+```
+```php
+// set the bandwidth priority
+$torrent->setBandwidthPriority(1);
+```
+```php
+// set the download limit (in K/s)
+$torrent->setDownloadLimit(false);
+```
+```php
+// Mark files as wanted
+// Use an empty array for all files, use an array of ids to be more selective [0,2]
+// In this case we only want to download the second file
+$torrent->setFilesWanted([1]);
+```
+```php
+// Mark files as unwanted
+// Use an empty array for all files, use an array of ids to be more selective [0,2]
+// In this case we don't want to download the first file
+$torrent->setFilesUnwanted([0]);
+```
+```php
+// true if session upload limits are honored
+$torrent->setHonorsSessionLimits(true);
+```
+```php
+// Set a new directory for the torrent's contents
+$torrent->setLocation(false);
+```
+```php
+// Set the peer limit (max amount of peer)
+$torrent->setPeerLimit(40);
+```
+```php
+// Set the priority for files to high
+// Use en empty array to update priority for all files
+// or use the file ids [0,2]
+$torrent->setPriorityHigh([]);
+```
+```php
+// Set the priority for files to low
+// Use en empty array to update priority for all files
+// or use the file ids [0,2]
+$torrent->setPriorityLow(false);
+```
+```php
+// Set the priority for files to normall
+// Use en empty array to update priority for all files
+// or use the file ids [0,2]
+$torrent->setPriorityNormal(false);
+```
+```php
+// Set the seed ratio limit
+$torrent->setSeedRatioLimit(1.2);
+```
+```php
+// Set the seed ratio mode
+// 0 = global, 1 = see seedRatioLimit, 2 = unlimitted
+$torrent->setSeedRatioMode(1);
+```
+```php
+// Change the upload limit (in K/s)
+$torrent->setUploadLimit(512);
+```
+```php
+// Should the torrent's upload be limitted?
+$torrent->setUploadLimited(false);
+```
 
 ### Getters
 The entity has a lot of properties, however I've added a few getters for ease-of-use:
