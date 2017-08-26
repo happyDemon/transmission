@@ -94,6 +94,22 @@ Using any of these methods will let you add new torrents.
 Each time it will return a `HappyDemon\Services\Transmission\Torrents\Entity` object.
 The catch is, only 3 properties will be set though: id, hashString & name.
 
+You can also add some extra options that would overwrite Transmission's own default settings:
+
+
+```php
+$torrent = $transmission->torrents()->addFromUrl($urlToTorrent, ['uploadLimit' => 512]);
+```
+
+#### Setting defaults
+
+You could also overwrite Transmission's defaults 'globally'
+```php
+$torrents = $transmission->torrents()->defaults(['uploadLimit' => 512]);
+
+$torrent = $torrents->addFromUrl($urlToTorrent);
+```
+
 ## Torrent entity methods
 
 These are the methods that are available on a `HappyDemon\Services\Transmission\Torrents\Entity` object.

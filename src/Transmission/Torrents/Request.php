@@ -19,6 +19,8 @@ class Request extends BaseRequest
         'torrentFile', 'uploadedEver', 'uploadLimit', 'uploadLimited', 'uploadRatio', 'wanted', 'webseeds', 'webseedsSendingToUs'
     ];
 
+    protected $defaults = [];
+
     /**
      * Get all torrents.
      *
@@ -64,7 +66,7 @@ class Request extends BaseRequest
     {
         return $this->send([
             'method' => 'torrent-add',
-            'arguments' => array_merge($extra_param, ['filename' => $url])
+            'arguments' => array_merge($extra_param, $this->defaults, ['filename' => $url])
         ]);
     }
 
@@ -101,7 +103,20 @@ class Request extends BaseRequest
 
         return $this->send([
             'method' => 'torrent-add',
-            'arguments' => array_merge($extra_param, ['metainfo' => $content])
+            'arguments' => array_merge($extra_param, $this->defaults, ['metainfo' => $content])
         ]);
+    }
+
+    /**
+     * Set defaults properties that you want to send over every time you create a torrent.
+     * For example you could set the seed or upload limit.
+     *
+     * These defaults will always overwrite you transmission program's default settings.
+     *
+     * @param array $properties
+     */
+    public function defaults( array $properties )
+    {
+        $this->defaults = $properties;
     }
 }
