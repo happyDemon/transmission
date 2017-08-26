@@ -44,18 +44,64 @@ class Request
         ]);
     }
 
-    public function addFromUrl( $url )
+    /**
+     * Extra param can contain:
+     *  - download-dir: The directory you want the download to end up in
+     *  - paused: Should it start paused?
+     *  - peer-limit: maximum number of peers
+     *  - files-wanted: indices of file(s) to download
+     *  - files-unwanted: indices of file(s) not to download
+     *  - priority-high: indices of high-priority file(s)
+     *  - priority-low: indices of low-priority file(s)
+     *  - priority-normal: indices of normal-priority file(s)
+     *
+     * @param       $url
+     * @param array $extra_param
+     *
+     * @return array
+     */
+    public function addFromUrl( $url, $extra_param = [] )
     {
-
+        return $this->transmission->request->send([
+            'method' => 'torrent-add',
+            'arguments' => array_merge($extra_param, ['filename' => $url])
+        ]);
     }
 
-    public function addFile( $fileName )
+    /**
+     * @see addFromUrl
+     *
+     * @param       $fileName
+     * @param array $extra_param
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function addFile( $fileName, $extra_param = []  )
     {
+        if(!file_exists($fileName)) throw new \Exception('File does not exist: ' . $fileName);
 
+        $content = base64_encode(file_get_contents($fileName));
+
+        return $this->addFromBase64($content, $extra_param);
     }
 
-    public function addFromBase64( $blob )
+    /**
+     * @see addFromUrl
+     *
+     * @param       $content
+     * @param array $extra_param
+     *
+     * @return array
+     */
+    public function addFromBase64( $content, $extra_param = []  )
     {
+        // Make sure filename is not present
+        unset($extra_param['filename']);
 
+        return $this->transmission->request->send([
+            'method' => 'torrent-add',
+            'arguments' => array_merge($extra_param, ['metainfo' => $content])
+        ]);
     }
 }
